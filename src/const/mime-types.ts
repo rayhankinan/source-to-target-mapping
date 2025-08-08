@@ -1,4 +1,7 @@
-export const CSV_MIME_TYPE = "text/csv";
-export const XLS_MIME_TYPE = "application/vnd.ms-excel";
-export const XLSX_MIME_TYPE =
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+export const MIME_TYPES = {
+  CSV: "text/csv",
+  XLS: "application/vnd.ms-excel",
+  XLSX: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+} as const;
+
+export type MimeType = (typeof MIME_TYPES)[keyof typeof MIME_TYPES];
