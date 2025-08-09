@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
+import { useEffect, useMemo, useState, type JSX } from "react";
 import { keepPreviousData, skipToken, useQuery } from "@tanstack/react-query";
 import { match } from "ts-pattern";
 import alasql from "alasql";
-import _ from "lodash";
 import { type ColumnDef } from "@tanstack/react-table";
 import DataTable from "@/components/features/data-table";
 import DataTableColumnHeader from "@/components/features/data-table-column-header";
@@ -65,20 +64,6 @@ function Preview({ file }: PreviewProps): JSX.Element {
     [fetchStatus.status, fetchStatus.data]
   );
 
-  const onQueryChange = useCallback((newQuery: string) => {
-    try {
-      alasql.parse(newQuery);
-      setQuery(newQuery);
-    } catch (error) {
-      console.error("Invalid query:", error);
-    }
-  }, []);
-
-  const debounceQueryChange = useMemo(
-    () => _.debounce(onQueryChange, 1000),
-    [onQueryChange]
-  );
-
   useEffect(() => setQuery(defaultQuery), [defaultQuery]);
 
   if (fetchStatus.status === "pending")
@@ -86,8 +71,8 @@ function Preview({ file }: PreviewProps): JSX.Element {
       <DataTable
         status="pending"
         columns={[selectableColumn, ...dynamicColumns]}
-        defaultQuery={defaultQuery}
-        onQueryChange={debounceQueryChange}
+        query={query}
+        setQuery={setQuery}
       />
     );
 
@@ -97,8 +82,8 @@ function Preview({ file }: PreviewProps): JSX.Element {
         status="error"
         error={fetchStatus.error}
         columns={[selectableColumn, ...dynamicColumns]}
-        defaultQuery={defaultQuery}
-        onQueryChange={debounceQueryChange}
+        query={query}
+        setQuery={setQuery}
       />
     );
 
@@ -107,8 +92,8 @@ function Preview({ file }: PreviewProps): JSX.Element {
       status="success"
       columns={[selectableColumn, ...dynamicColumns]}
       data={fetchStatus.data}
-      defaultQuery={defaultQuery}
-      onQueryChange={debounceQueryChange}
+      query={query}
+      setQuery={setQuery}
     />
   );
 }

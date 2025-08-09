@@ -1,5 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { match } from "ts-pattern";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import alasql from "alasql";
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -21,7 +25,15 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import {
   Table,
   TableBody,
@@ -30,6 +42,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 
 interface DataTablePropsPending {
   status: "pending";
@@ -51,12 +64,27 @@ type DataTableProps<TData, TValue> = (
   | DataTablePropsSuccess<TData>
 ) & {
   columns: ColumnDef<TData, TValue>[];
-  defaultQuery: string;
-  onQueryChange: (query: string) => void;
+  query: string;
+  setQuery: (query: string) => void;
 };
 
+const schema = z.object({
+  query: z.string().refine(
+    (val) => {
+      try {
+        alasql.parse(val);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    {
+      message: "Invalid SQL query",
+    }
+  ),
+});
+
 function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
-  const [query, setQuery] = useState<string>(props.defaultQuery);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -81,21 +109,57 @@ function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
     },
   });
 
-  useEffect(() => setQuery(props.defaultQuery), [props.defaultQuery]);
+  const form = useForm<z.infer<typeof schema>>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      query: props.query,
+    },
+  });
+
+  const onSubmit = useCallback(
+    (data: z.infer<typeof schema>) => {
+      props.setQuery(data.query);
+    },
+    [props]
+  );
 
   return (
     <div className="container mx-auto py-10 flex flex-col justify-center items-center gap-3">
       <div className="w-full">
         <div className="flex items-center py-4">
-          <Input
-            placeholder="Filter columns..."
-            className="max-w-sm"
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              props.onQueryChange(e.target.value);
-            }}
-          />
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="flex flex-row gap-3 items-center"
+            >
+              <FormField
+                control={form.control}
+                name="query"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm">SQL Query</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Filter columns..."
+                        className="w-sm"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Enter a valid SQL query to filter the data.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="submit"
+                className="cursor-pointer disabled:cursor-not-allowed"
+              >
+                Submit
+              </Button>
+            </form>
+          </Form>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="ml-auto">
