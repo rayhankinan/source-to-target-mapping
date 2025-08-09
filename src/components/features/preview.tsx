@@ -5,9 +5,9 @@ import alasql from "alasql";
 import { type ColumnDef } from "@tanstack/react-table";
 import { AlertCircleIcon, LoaderCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Checkbox } from "@/components/ui/checkbox";
 import DataTable from "@/components/features/data-table";
-import { DataTableColumnHeader } from "@/components/features/data-table-column-header";
+import DataTableColumnHeader from "@/components/features/data-table-column-header";
+import selectableColumn from "@/components/features/columns";
 import { MIME_TYPES } from "@/const/mime-types";
 
 interface PreviewProps {
@@ -36,32 +36,6 @@ function Preview({ file }: PreviewProps): JSX.Element {
       alasql.promise<Record<string, unknown>[]>(query, [objectURL]),
   });
 
-  const selectableColumn = useMemo<ColumnDef<Record<string, unknown>>>(
-    () => ({
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    }),
-    []
-  );
-
   const dynamicColumns = useMemo<ColumnDef<Record<string, unknown>>[]>(
     () =>
       fetchStatus.status === "success" && fetchStatus.data.length > 0
@@ -81,7 +55,7 @@ function Preview({ file }: PreviewProps): JSX.Element {
 
   useEffect(
     () => () => {
-      if (objectURL) URL.revokeObjectURL(objectURL);
+      if (objectURL !== undefined) URL.revokeObjectURL(objectURL);
     },
     [objectURL]
   );
