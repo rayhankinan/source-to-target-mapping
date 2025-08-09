@@ -74,13 +74,14 @@ export default function Preview({ file }: PreviewProps): JSX.Element {
     },
   });
 
-  const { mutate: createTable } = createTableMutation;
+  const { mutate: createTable, status: createTableStatus } =
+    createTableMutation;
 
   const fetchStatus = useQuery({
     queryKey: [selectQuery],
     queryFn: async () => alasql.promise<Record<string, unknown>[]>(selectQuery),
     placeholderData: keepPreviousData,
-    enabled: createTableMutation.isSuccess,
+    enabled: createTableStatus === "success",
   });
 
   const dynamicColumns = useMemo<ColumnDef<Record<string, unknown>>[]>(
