@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Preview from "@/components/features/preview";
 import PreviewEmpty from "@/components/features/preview-empty";
+import Flow from "@/components/features/flow";
 import { MIME_TYPES } from "@/const/mime-types";
 
 export default function Page(): JSX.Element {
@@ -33,6 +34,7 @@ export default function Page(): JSX.Element {
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6">
+      <Flow />
       {file !== undefined ? <Preview file={file} /> : <PreviewEmpty />}
       <div className="flex flex-col gap-3">
         <Label htmlFor={id}>Upload File</Label>
