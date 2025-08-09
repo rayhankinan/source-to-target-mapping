@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type JSX } from "react";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { match } from "ts-pattern";
 import alasql from "alasql";
+import { toast } from "sonner";
 import { type ColumnDef } from "@tanstack/react-table";
 import DataTable from "@/components/features/data-table";
 import DataTableColumnHeader from "@/components/features/data-table-column-header";
@@ -45,8 +46,8 @@ export default function Preview({ file }: PreviewProps): JSX.Element {
       await alasql.promise("ATTACH INDEXEDDB DATABASE fusion");
       await alasql.promise("USE fusion");
     },
-    onError: (error) => {
-      console.error("Error initializing database:", error);
+    onError: () => {
+      toast.error("Failed to initialize database. Please try again.");
     },
   });
 
@@ -69,8 +70,8 @@ export default function Preview({ file }: PreviewProps): JSX.Element {
       const tableName = sanitizeTableName(file.name);
       setSelectQuery(`SELECT * FROM ${tableName}`);
     },
-    onError: (error) => {
-      console.error("Error executing create table query:", error);
+    onError: () => {
+      toast.error("Failed to create table. Please try again.");
     },
   });
 

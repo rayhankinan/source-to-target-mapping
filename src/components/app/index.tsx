@@ -33,7 +33,7 @@ export default function Page(): JSX.Element {
   }, []);
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center gap-6">
+    <main className="flex min-h-svh flex-col items-center justify-center gap-6 px-3 py-2">
       <Flow />
       {file !== undefined ? <Preview file={file} /> : <PreviewEmpty />}
       <div className="flex flex-col gap-3">
@@ -53,6 +53,6 @@ export default function Page(): JSX.Element {
           Clear File
         </Button>
       </div>
-    </div>
+    </main>
   );
 }
