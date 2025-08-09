@@ -1,5 +1,11 @@
 import { type JSX } from "react";
-import { ReactFlow } from "@xyflow/react";
+import {
+  Background,
+  BackgroundVariant,
+  Controls,
+  MiniMap,
+  ReactFlow,
+} from "@xyflow/react";
 import { useShallow } from "zustand/react/shallow";
 import useFlowStore from "@/stores/flow";
 
@@ -16,7 +22,7 @@ export default function Flow(): JSX.Element {
     );
 
   return (
-    <div className="container mx-auto h-100">
+    <div className="container mx-auto h-150 rounded-md border">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -24,7 +30,11 @@ export default function Flow(): JSX.Element {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         fitView
-      />
+      >
+        <Controls />
+        <MiniMap />
+        <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
+      </ReactFlow>
     </div>
   );
 }

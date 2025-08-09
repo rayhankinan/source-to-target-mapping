@@ -2,9 +2,9 @@ import { useCallback, useId, useMemo, useRef, useState, type JSX } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Preview from "@/components/features/preview";
-import PreviewEmpty from "@/components/features/preview-empty";
-import Flow from "@/components/features/flow";
+import Preview from "@/components/features/table/preview";
+import PreviewEmpty from "@/components/features/table/preview-empty";
+import Flow from "@/components/features/diagram/flow";
 import { MIME_TYPES } from "@/const/mime-types";
 
 export default function Page(): JSX.Element {
@@ -33,7 +33,7 @@ export default function Page(): JSX.Element {
   }, []);
 
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center gap-6 px-3 py-2">
+    <main className="flex min-h-svh flex-col items-center justify-center gap-6 py-8">
       <Flow />
       {file !== undefined ? <Preview file={file} /> : <PreviewEmpty />}
       <div className="flex flex-col gap-3">

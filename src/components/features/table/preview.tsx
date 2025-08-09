@@ -4,9 +4,9 @@ import { match } from "ts-pattern";
 import alasql from "alasql";
 import { toast } from "sonner";
 import { type ColumnDef } from "@tanstack/react-table";
-import DataTable from "@/components/features/data-table";
-import DataTableColumnHeader from "@/components/features/data-table-column-header";
-import selectableColumn from "@/components/features/columns";
+import DataTable from "@/components/features/table/data-table";
+import DataTableColumnHeader from "@/components/features/table/data-table-column-header";
+import selectableColumn from "@/components/features/table/columns";
 import { MIME_TYPES } from "@/const/mime-types";
 import { sanitizeTableName } from "@/utils/sanitize";
 

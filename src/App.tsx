@@ -1,6 +1,7 @@
 import { useState, type JSX } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ReactFlowProvider } from "@xyflow/react";
 import Page from "@/components/app";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -20,8 +21,10 @@ export default function App(): JSX.Element {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Page />
-      <Toaster position="bottom-right" />
+      <ReactFlowProvider>
+        <Page />
+        <Toaster position="bottom-right" />
+      </ReactFlowProvider>
       <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
     </QueryClientProvider>
   );
