@@ -33,7 +33,7 @@ function Preview({ file }: PreviewProps): JSX.Element {
   const fetchStatus = useQuery({
     queryKey: [query, objectURL],
     queryFn: async () =>
-      alasql.promise<Record<string, unknown>[]>(query, [objectURL]),
+      alasql.promise<Record<string, unknown>[]>(query, [objectURL]), // TODO: Handle CSV with BOM
   });
 
   const dynamicColumns = useMemo<ColumnDef<Record<string, unknown>>[]>(
