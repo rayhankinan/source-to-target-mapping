@@ -1,10 +1,9 @@
-import { useEffect, useMemo, type JSX } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
+import { keepPreviousData, skipToken, useQuery } from "@tanstack/react-query";
 import { match } from "ts-pattern";
 import alasql from "alasql";
+import _ from "lodash";
 import { type ColumnDef } from "@tanstack/react-table";
-import { AlertCircleIcon, LoaderCircle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import DataTable from "@/components/features/data-table";
 import DataTableColumnHeader from "@/components/features/data-table-column-header";
 import selectableColumn from "@/components/features/columns";
@@ -15,12 +14,8 @@ interface PreviewProps {
 }
 
 function Preview({ file }: PreviewProps): JSX.Element {
-  const objectURL = useMemo(
-    () => (file !== undefined ? URL.createObjectURL(file) : undefined),
-    [file]
-  );
   const mimeType = useMemo(() => file.type, [file]);
-  const query = useMemo(
+  const defaultQuery = useMemo(
     () =>
       match(mimeType)
         .with(MIME_TYPES.CSV, () => "SELECT * FROM CSV(?, {autoExt: false})")
@@ -30,55 +25,90 @@ function Preview({ file }: PreviewProps): JSX.Element {
     [mimeType]
   );
 
+  const [query, setQuery] = useState<string>(defaultQuery);
+
   const fetchStatus = useQuery({
-    queryKey: [query, objectURL],
-    queryFn: async () =>
-      alasql.promise<Record<string, unknown>[]>(query, [objectURL]), // TODO: Handle CSV with BOM
+    queryKey: [query, file.name],
+    queryFn:
+      query !== undefined
+        ? async () => {
+            const objectURL = URL.createObjectURL(file);
+
+            try {
+              return await alasql.promise<Record<string, unknown>[]>(query, [
+                objectURL,
+              ]); // TODO: Handle CSV with BOM
+            } finally {
+              URL.revokeObjectURL(objectURL);
+            }
+          }
+        : skipToken,
+    placeholderData: keepPreviousData,
   });
 
   const dynamicColumns = useMemo<ColumnDef<Record<string, unknown>>[]>(
     () =>
       fetchStatus.status === "success" && fetchStatus.data.length > 0
-        ? Object.keys(fetchStatus.data[0]).map(
-            (key) =>
-              ({
-                id: key,
-                accessorKey: key,
-                header: ({ column }) => (
-                  <DataTableColumnHeader column={column} title={key} />
-                ),
-              } satisfies ColumnDef<Record<string, unknown>>)
-          )
+        ? Object.keys(fetchStatus.data[0])
+            .map(
+              (key) =>
+                ({
+                  id: key,
+                  accessorKey: key,
+                  header: ({ column }) => (
+                    <DataTableColumnHeader column={column} title={key} />
+                  ),
+                } satisfies ColumnDef<Record<string, unknown>>)
+            )
+            .filter((column) => column.id !== "")
         : [],
     [fetchStatus.status, fetchStatus.data]
   );
 
-  useEffect(
-    () => () => {
-      if (objectURL !== undefined) URL.revokeObjectURL(objectURL);
-    },
-    [objectURL]
+  const onQueryChange = useCallback((newQuery: string) => {
+    try {
+      alasql.parse(newQuery);
+      setQuery(newQuery);
+    } catch (error) {
+      console.error("Invalid query:", error);
+    }
+  }, []);
+
+  const debounceQueryChange = useMemo(
+    () => _.debounce(onQueryChange, 1000),
+    [onQueryChange]
   );
 
+  useEffect(() => setQuery(defaultQuery), [defaultQuery]);
+
   if (fetchStatus.status === "pending")
-    return <LoaderCircle className="animate-spin" />;
+    return (
+      <DataTable
+        status="pending"
+        columns={[selectableColumn, ...dynamicColumns]}
+        defaultQuery={defaultQuery}
+        onQueryChange={debounceQueryChange}
+      />
+    );
 
   if (fetchStatus.status === "error")
     return (
-      <Alert
-        variant="destructive"
-        className="w-full max-w-md border-destructive"
-      >
-        <AlertCircleIcon />
-        <AlertTitle>An error occurred while fetching the data</AlertTitle>
-        <AlertDescription>{fetchStatus.error.message}</AlertDescription>
-      </Alert>
+      <DataTable
+        status="error"
+        error={fetchStatus.error}
+        columns={[selectableColumn, ...dynamicColumns]}
+        defaultQuery={defaultQuery}
+        onQueryChange={debounceQueryChange}
+      />
     );
 
   return (
     <DataTable
+      status="success"
       columns={[selectableColumn, ...dynamicColumns]}
       data={fetchStatus.data}
+      defaultQuery={defaultQuery}
+      onQueryChange={debounceQueryChange}
     />
   );
 }

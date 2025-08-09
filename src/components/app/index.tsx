@@ -32,11 +32,7 @@ function Page(): JSX.Element {
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6">
-      {file !== undefined && (
-        <div className="container mx-auto py-10 flex flex-col justify-center items-center gap-6">
-          <Preview file={file} />
-        </div>
-      )}
+      {file !== undefined && <Preview file={file} />}
       <div className="flex flex-col gap-3">
         <Label htmlFor={id}>Upload File</Label>
         <Input
