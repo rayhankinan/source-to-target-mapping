@@ -15,7 +15,7 @@ export default function Page(): JSX.Element {
     <main className="flex min-h-svh flex-col items-center justify-center gap-6 py-8">
       <AppFlow />
       {selectedNode.map((node) => (
-        <MemoizedPreview key={node.id} file={node.data.file} />
+        <MemoizedPreview key={node.id} data={node.data} />
       ))}
     </main>
   );

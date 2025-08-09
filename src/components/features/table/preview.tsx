@@ -1,88 +1,25 @@
-import { useEffect, useMemo, useState, type JSX } from "react";
-import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
-import { match } from "ts-pattern";
+import { useMemo, useState, type JSX } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import alasql from "alasql";
-import { toast } from "sonner";
 import { type ColumnDef } from "@tanstack/react-table";
 import DataTable from "@/components/features/table/data-table";
 import DataTableColumnHeader from "@/components/features/table/data-table-column-header";
 import selectableColumn from "@/components/features/table/columns";
-import { MIME_TYPES } from "@/const/mime-types";
-import { sanitizeTableName } from "@/utils/sanitize";
+import type { NodeData } from "@/types/flow";
 
 interface PreviewProps {
-  file: File;
+  data: NodeData;
 }
 
-export default function Preview({ file }: PreviewProps): JSX.Element {
-  const tableName = useMemo(() => sanitizeTableName(file.name), [file.name]);
-  const createQuery = useMemo(
-    () =>
-      match(file.type)
-        .with(
-          MIME_TYPES.CSV,
-          () => `SELECT * INTO ${tableName} FROM CSV(?, {autoExt: false})` // TODO: Handle CSV with BOM
-        )
-        .with(
-          MIME_TYPES.XLS,
-          () => `SELECT * INTO ${tableName} FROM XLS(?, {autoExt: false})`
-        )
-        .with(
-          MIME_TYPES.XLSX,
-          () => `SELECT * INTO ${tableName} FROM XLSX(?, {autoExt: false})`
-        )
-        .otherwise(() => `SELECT * INTO ${tableName} FROM ?`),
-    [file.type, tableName]
-  );
-
+export default function Preview({ data }: PreviewProps): JSX.Element {
   const [selectQuery, setSelectQuery] = useState<string>(
-    `SELECT * FROM ${tableName}`
+    `SELECT * FROM ${data.label}`
   );
-
-  const initializeDatabaseMutation = useMutation({
-    mutationFn: async () => {
-      await alasql.promise("DROP INDEXEDDB DATABASE IF EXISTS fusion");
-      await alasql.promise("CREATE INDEXEDDB DATABASE IF NOT EXISTS fusion");
-      await alasql.promise("ATTACH INDEXEDDB DATABASE fusion");
-      await alasql.promise("USE fusion");
-    },
-    onError: () => {
-      toast.error("Failed to initialize database. Please try again.");
-    },
-  });
-
-  const { mutate: initializeDatabase, status: initializeStatus } =
-    initializeDatabaseMutation;
-
-  const createTableMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const objectURL = URL.createObjectURL(file);
-
-      try {
-        await alasql.promise(`DROP TABLE IF EXISTS ${tableName}`);
-        await alasql.promise(`CREATE TABLE IF NOT EXISTS ${tableName}`);
-        await alasql.promise(createQuery, [objectURL]);
-      } finally {
-        URL.revokeObjectURL(objectURL);
-      }
-    },
-    onSuccess: (_, file) => {
-      const tableName = sanitizeTableName(file.name);
-      setSelectQuery(`SELECT * FROM ${tableName}`);
-    },
-    onError: () => {
-      toast.error("Failed to create table. Please try again.");
-    },
-  });
-
-  const { mutate: createTable, status: createTableStatus } =
-    createTableMutation;
 
   const fetchStatus = useQuery({
     queryKey: [selectQuery],
     queryFn: async () => alasql.promise<Record<string, unknown>[]>(selectQuery),
     placeholderData: keepPreviousData,
-    enabled: createTableStatus === "success",
   });
 
   const dynamicColumns = useMemo<ColumnDef<Record<string, unknown>>[]>(
@@ -103,14 +40,6 @@ export default function Preview({ file }: PreviewProps): JSX.Element {
         : [],
     [fetchStatus.status, fetchStatus.data]
   );
-
-  useEffect(() => {
-    initializeDatabase();
-  }, [initializeDatabase]);
-
-  useEffect(() => {
-    if (initializeStatus === "success") createTable(file);
-  }, [file, createTable, initializeStatus]);
 
   if (fetchStatus.status === "pending")
     return (

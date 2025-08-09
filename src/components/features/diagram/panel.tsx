@@ -1,69 +1,81 @@
-import { useCallback, useMemo, useRef, type JSX } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type JSX,
+} from "react";
+import { useMutation } from "@tanstack/react-query";
+import alasql from "alasql";
+import { toast } from "sonner";
 import { Panel } from "@xyflow/react";
-import { useShallow } from "zustand/react/shallow";
-import _ from "lodash";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import ProgressDialog from "@/components/features/diagram/progress-dialog";
 import { MIME_TYPES } from "@/const/mime-types";
-import useFlowStore from "@/stores/flow";
-import type { AppNode } from "@/types/flow";
-import { sanitizeTableName } from "@/utils/sanitize";
 
 export default function AppPanel(): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [fileList, setFileList] = useState<FileList | null>(null);
 
   const acceptedMimeTypes = useMemo(
     () => [MIME_TYPES.CSV, MIME_TYPES.XLS, MIME_TYPES.XLSX].join(", "),
     []
   );
 
-  const { nodes, setNodes } = useFlowStore(
-    useShallow((state) => ({
-      nodes: state.nodes,
-      setNodes: state.setNodes,
-    }))
-  );
+  const { mutate: initializeDatabase, status: initializeStatus } = useMutation({
+    mutationFn: async () => {
+      await alasql.promise("DROP INDEXEDDB DATABASE IF EXISTS fusion");
+      await alasql.promise("CREATE INDEXEDDB DATABASE IF NOT EXISTS fusion");
+      await alasql.promise("ATTACH INDEXEDDB DATABASE fusion");
+      await alasql.promise("USE fusion");
+    },
+    onError: () => {
+      toast.error("Failed to initialize database. Please try again.");
+    },
+  });
 
   const onInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
 
-      if (files !== null && files.length > 0)
-        setNodes([
-          ...nodes,
-          ...Array.from(files).map(
-            (file) =>
-              ({
-                id: _.uniqueId("node_"),
-                position: { x: 0, y: 0 },
-                data: { label: sanitizeTableName(file.name), file },
-              } satisfies AppNode)
-          ),
-        ]);
+      setFileList(files);
     },
-    [nodes, setNodes]
+    []
   );
 
   const onButtonClick = useCallback(() => {
     inputRef.current?.click();
   }, []);
 
+  useEffect(() => {
+    initializeDatabase();
+  }, [initializeDatabase]);
+
   return (
-    <Panel position="top-left">
-      <Input
-        ref={inputRef}
-        onChange={onInputChange}
-        accept={acceptedMimeTypes}
-        type="file"
-        className="hidden"
-        multiple
+    <>
+      <Panel position="top-left">
+        <Input
+          ref={inputRef}
+          onChange={onInputChange}
+          accept={acceptedMimeTypes}
+          type="file"
+          className="hidden"
+          multiple
+        />
+        <Button
+          onClick={onButtonClick}
+          disabled={initializeStatus !== "success"}
+          className="cursor-pointer disabled:cursor-not-allowed"
+        >
+          Upload Files
+        </Button>
+      </Panel>
+      <ProgressDialog
+        fileList={fileList}
+        resetFileList={() => setFileList(null)}
       />
-      <Button
-        onClick={onButtonClick}
-        className="cursor-pointer disabled:cursor-not-allowed"
-      >
-        Upload Files
-      </Button>
-    </Panel>
+    </>
   );
 }

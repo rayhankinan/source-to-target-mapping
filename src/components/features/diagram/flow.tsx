@@ -23,7 +23,7 @@ export default function AppFlow(): JSX.Element {
     );
 
   return (
-    <div className="container mx-auto h-150 rounded-md border">
+    <div className="container mx-auto h-180 rounded-md border">
       <ReactFlow
         nodes={nodes}
         edges={edges}
