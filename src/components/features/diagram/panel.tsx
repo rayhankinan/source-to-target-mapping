@@ -41,6 +41,8 @@ export default function AppPanel(): JSX.Element {
       const files = e.target.files;
 
       setFileList(files);
+
+      e.target.value = ""; // Reset input value to allow re-uploading the same file
     },
     []
   );

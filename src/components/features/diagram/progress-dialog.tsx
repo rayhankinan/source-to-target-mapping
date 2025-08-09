@@ -3,7 +3,6 @@ import { useMutation } from "@tanstack/react-query";
 import { useAsyncQueuer } from "@tanstack/react-pacer/async-queuer";
 import alasql from "alasql";
 import { match } from "ts-pattern";
-import _ from "lodash";
 import { useShallow } from "zustand/react/shallow";
 import { toast } from "sonner";
 import {
@@ -131,27 +130,26 @@ export default function ProgressDialog({
     Array.from(
       fileList !== null && fileList.length > 0 ? fileList : []
     ).forEach((file) => {
-      const id = _.uniqueId("node_");
-      const label = sanitizeTableName(file.name);
+      const tableName = sanitizeTableName(file.name);
       const createQuery = match(file.type)
         .with(
           MIME_TYPES.CSV,
-          () => `SELECT * INTO ${label} FROM CSV(?, {autoExt: false})` // TODO: Handle CSV with BOM
+          () => `SELECT * INTO ${tableName} FROM CSV(?, {autoExt: false})` // TODO: Handle CSV with BOM
         )
         .with(
           MIME_TYPES.XLS,
-          () => `SELECT * INTO ${label} FROM XLS(?, {autoExt: false})`
+          () => `SELECT * INTO ${tableName} FROM XLS(?, {autoExt: false})`
         )
         .with(
           MIME_TYPES.XLSX,
-          () => `SELECT * INTO ${label} FROM XLSX(?, {autoExt: false})`
+          () => `SELECT * INTO ${tableName} FROM XLSX(?, {autoExt: false})`
         )
-        .otherwise(() => `SELECT * INTO ${label} FROM ?`);
+        .otherwise(() => `SELECT * INTO ${tableName} FROM ?`);
 
       addItem({
-        id,
+        id: tableName,
+        label: tableName,
         createQuery,
-        label,
         file,
       });
     });
