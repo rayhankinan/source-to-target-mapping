@@ -1,6 +1,5 @@
+import type { AppEdge, AppNode } from "@/types/flow";
 import {
-  type Edge,
-  type Node,
   type OnNodesChange,
   type OnEdgesChange,
   type OnConnect,
@@ -9,13 +8,6 @@ import {
   addEdge,
 } from "@xyflow/react";
 import { create } from "zustand";
-
-export type NodeData = Record<string, unknown>;
-export type NodeType = undefined;
-export type EdgeData = Record<string, unknown>;
-export type EdgeType = undefined;
-export type AppNode = Node<NodeData, NodeType>;
-export type AppEdge = Edge<EdgeData, EdgeType>;
 
 export type AppState = {
   nodes: AppNode[];
@@ -27,16 +19,9 @@ export type AppState = {
   setEdges: (edges: AppEdge[]) => void;
 };
 
-const initialNodes: AppNode[] = [
-  { id: "n1", position: { x: 0, y: 0 }, data: { label: "Node 1" } },
-  { id: "n2", position: { x: 0, y: 100 }, data: { label: "Node 2" } },
-];
-
-const initialEdges: AppEdge[] = [{ id: "n1-n2", source: "n1", target: "n2" }];
-
 const useFlowStore = create<AppState>((set, get) => ({
-  nodes: initialNodes,
-  edges: initialEdges,
+  nodes: [],
+  edges: [],
   onNodesChange: (changes) => {
     set({
       nodes: applyNodeChanges(changes, get().nodes),

@@ -8,8 +8,9 @@ import {
 } from "@xyflow/react";
 import { useShallow } from "zustand/react/shallow";
 import useFlowStore from "@/stores/flow";
+import AppPanel from "@/components/features/diagram/panel";
 
-export default function Flow(): JSX.Element {
+export default function AppFlow(): JSX.Element {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect } =
     useFlowStore(
       useShallow((state) => ({
@@ -31,6 +32,7 @@ export default function Flow(): JSX.Element {
         onConnect={onConnect}
         fitView
       >
+        <AppPanel />
         <Controls />
         <MiniMap />
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} />

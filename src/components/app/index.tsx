@@ -1,58 +1,22 @@
-import { useCallback, useId, useMemo, useRef, useState, type JSX } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { memo, type JSX } from "react";
+import { useShallow } from "zustand/react/shallow";
+import useFlowStore from "@/stores/flow";
 import Preview from "@/components/features/table/preview";
-import PreviewEmpty from "@/components/features/table/preview-empty";
-import Flow from "@/components/features/diagram/flow";
-import { MIME_TYPES } from "@/const/mime-types";
+import AppFlow from "@/components/features/diagram/flow";
+
+const MemoizedPreview = memo(Preview);
 
 export default function Page(): JSX.Element {
-  const id = useId();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<File>();
-
-  const acceptedMimeTypes = useMemo(
-    () => [MIME_TYPES.CSV, MIME_TYPES.XLS, MIME_TYPES.XLSX].join(", "),
-    []
+  const selectedNode = useFlowStore(
+    useShallow((state) => state.nodes.filter((node) => node.selected))
   );
-
-  const onInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-
-      if (files !== null && files.length > 0) setFile(files[0]);
-    },
-    []
-  );
-
-  const onClearFile = useCallback(() => {
-    if (inputRef.current !== null) inputRef.current.value = "";
-
-    setFile(undefined);
-  }, []);
 
   return (
     <main className="flex min-h-svh flex-col items-center justify-center gap-6 py-8">
-      <Flow />
-      {file !== undefined ? <Preview file={file} /> : <PreviewEmpty />}
-      <div className="flex flex-col gap-3">
-        <Label htmlFor={id}>Upload File</Label>
-        <Input
-          id={id}
-          ref={inputRef}
-          onChange={onInputChange}
-          accept={acceptedMimeTypes}
-          type="file"
-          className="cursor-pointer disabled:cursor-not-allowed"
-        />
-        <Button
-          className="cursor-pointer disabled:cursor-not-allowed"
-          onClick={onClearFile}
-        >
-          Clear File
-        </Button>
-      </div>
+      <AppFlow />
+      {selectedNode.map((node) => (
+        <MemoizedPreview key={node.id} file={node.data.file} />
+      ))}
     </main>
   );
 }
