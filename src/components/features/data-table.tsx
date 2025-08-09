@@ -130,7 +130,7 @@ export default function DataTable<TData, TValue>(
   }, [form, props.query]);
 
   return (
-    <div className="container mx-auto py-10 flex flex-col justify-center items-center gap-3">
+    <div className="container mx-auto flex flex-col justify-center items-center gap-3">
       <div className="w-full">
         <div className="flex items-center py-4">
           <Form {...form}>

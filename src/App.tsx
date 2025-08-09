@@ -9,7 +9,7 @@ export default function App(): JSX.Element {
       new QueryClient({
         defaultOptions: {
           queries: {
-            refetchOnMount: true,
+            refetchOnMount: "always",
             refetchOnWindowFocus: false,
             refetchOnReconnect: false,
             retryOnMount: false,
