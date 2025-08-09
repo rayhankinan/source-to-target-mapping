@@ -10,10 +10,6 @@ export default function App(): JSX.Element {
         defaultOptions: {
           queries: {
             refetchOnMount: "always",
-            refetchOnWindowFocus: false,
-            refetchOnReconnect: false,
-            retryOnMount: false,
-            retry: false,
             staleTime: 0,
             gcTime: 0,
           },
