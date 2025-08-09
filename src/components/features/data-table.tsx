@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState, type JSX } from "react";
 import { match } from "ts-pattern";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -64,8 +64,8 @@ type DataTableProps<TData, TValue> = (
   | DataTablePropsSuccess<TData>
 ) & {
   columns: ColumnDef<TData, TValue>[];
-  query: string;
-  setQuery: (query: string) => void;
+  query?: string;
+  setQuery?: (query: string) => void;
 };
 
 const schema = z.object({
@@ -84,7 +84,9 @@ const schema = z.object({
   ),
 });
 
-function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
+export default function DataTable<TData, TValue>(
+  props: DataTableProps<TData, TValue>
+): JSX.Element {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -118,10 +120,14 @@ function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
 
   const onSubmit = useCallback(
     (data: z.infer<typeof schema>) => {
-      props.setQuery(data.query);
+      props.setQuery?.(data.query);
     },
     [props]
   );
+
+  useEffect(() => {
+    form.reset({ query: props.query });
+  }, [form, props.query]);
 
   return (
     <div className="container mx-auto py-10 flex flex-col justify-center items-center gap-3">
@@ -245,7 +251,7 @@ function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
                     <TableRow>
                       <TableCell
                         colSpan={columns.length}
-                        className="h-24 text-center"
+                        className="h-64 text-center"
                       >
                         No results.
                       </TableCell>
@@ -284,5 +290,3 @@ function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
     </div>
   );
 }
-
-export default DataTable;

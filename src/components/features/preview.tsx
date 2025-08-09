@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type JSX } from "react";
-import { keepPreviousData, skipToken, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { match } from "ts-pattern";
 import alasql from "alasql";
 import { type ColumnDef } from "@tanstack/react-table";
@@ -12,7 +12,7 @@ interface PreviewProps {
   file: File;
 }
 
-function Preview({ file }: PreviewProps): JSX.Element {
+export default function Preview({ file }: PreviewProps): JSX.Element {
   const mimeType = useMemo(() => file.type, [file]);
   const defaultQuery = useMemo(
     () =>
@@ -27,21 +27,18 @@ function Preview({ file }: PreviewProps): JSX.Element {
   const [query, setQuery] = useState<string>(defaultQuery);
 
   const fetchStatus = useQuery({
-    queryKey: [query, file.name],
-    queryFn:
-      query !== undefined
-        ? async () => {
-            const objectURL = URL.createObjectURL(file);
+    queryKey: [query, file?.name],
+    queryFn: async () => {
+      const objectURL = URL.createObjectURL(file);
 
-            try {
-              return await alasql.promise<Record<string, unknown>[]>(query, [
-                objectURL,
-              ]); // TODO: Handle CSV with BOM
-            } finally {
-              URL.revokeObjectURL(objectURL);
-            }
-          }
-        : skipToken,
+      try {
+        return await alasql.promise<Record<string, unknown>[]>(query, [
+          objectURL,
+        ]); // TODO: Handle CSV with BOM
+      } finally {
+        URL.revokeObjectURL(objectURL);
+      }
+    },
     placeholderData: keepPreviousData,
   });
 
@@ -97,5 +94,3 @@ function Preview({ file }: PreviewProps): JSX.Element {
     />
   );
 }
-
-export default Preview;
