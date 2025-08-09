@@ -18,7 +18,7 @@ import { MIME_TYPES } from "@/const/mime-types";
 import { Progress } from "@/components/ui/progress";
 
 interface ProgressDialogProps {
-  fileList: FileList | null;
+  fileList: File[];
   resetFileList: () => void;
 }
 
@@ -33,10 +33,7 @@ export default function ProgressDialog({
     }))
   );
 
-  const open = useMemo(
-    () => fileList !== null && fileList.length > 0,
-    [fileList]
-  );
+  const open = useMemo(() => fileList.length > 0, [fileList]);
 
   const { mutateAsync: createTableAsync } = useMutation({
     mutationFn: async ({
@@ -111,19 +108,14 @@ export default function ProgressDialog({
     [reset, resetFileList]
   );
 
-  const maxFiles = useMemo(
-    () => (fileList !== null ? fileList.length : 0),
-    [fileList]
-  );
-
   const processedFiles = useMemo(
-    () => maxFiles - state.activeItems.length,
-    [maxFiles, state.activeItems.length]
+    () => fileList.length - state.activeItems.length,
+    [fileList.length, state.activeItems.length]
   );
 
   const progress = useMemo(
-    () => (maxFiles > 0 ? (100 * processedFiles) / maxFiles : 0),
-    [processedFiles, maxFiles]
+    () => (fileList.length > 0 ? (100 * processedFiles) / fileList.length : 0),
+    [processedFiles, fileList.length]
   );
 
   useEffect(() => {
@@ -160,7 +152,7 @@ export default function ProgressDialog({
       <DialogContent>
         <DialogTitle>Uploading files</DialogTitle>
         <DialogDescription>
-          {processedFiles} of {maxFiles} files uploaded
+          {processedFiles} of {fileList.length} files uploaded
         </DialogDescription>
         <Progress value={progress} className="w-full" />
       </DialogContent>

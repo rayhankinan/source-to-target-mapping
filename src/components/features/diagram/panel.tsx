@@ -17,7 +17,7 @@ import { MIME_TYPES } from "@/const/mime-types";
 
 export default function AppPanel(): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [fileList, setFileList] = useState<FileList | null>(null);
+  const [fileList, setFileList] = useState<File[]>([]);
 
   const acceptedMimeTypes = useMemo(
     () => [MIME_TYPES.CSV, MIME_TYPES.XLS, MIME_TYPES.XLSX].join(", "),
@@ -40,7 +40,7 @@ export default function AppPanel(): JSX.Element {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
 
-      setFileList(files);
+      setFileList(files ? Array.from(files) : []);
 
       e.target.value = ""; // Reset input value to allow re-uploading the same file
     },
@@ -76,7 +76,7 @@ export default function AppPanel(): JSX.Element {
       </Panel>
       <ProgressDialog
         fileList={fileList}
-        resetFileList={() => setFileList(null)}
+        resetFileList={() => setFileList([])}
       />
     </>
   );
