@@ -33,7 +33,7 @@ export default function ProgressDialog({
     }))
   );
 
-  const open = useMemo(() => fileList.length > 0, [fileList]);
+  const open = useMemo(() => fileList.length > 0, [fileList.length]);
 
   const { mutateAsync: createTableAsync } = useMutation({
     mutationFn: async ({
@@ -119,9 +119,7 @@ export default function ProgressDialog({
   );
 
   useEffect(() => {
-    Array.from(
-      fileList !== null && fileList.length > 0 ? fileList : []
-    ).forEach((file) => {
+    Array.from(fileList.length > 0 ? fileList : []).forEach((file) => {
       const tableName = sanitizeTableName(file.name);
       const createQuery = match(file.type)
         .with(
