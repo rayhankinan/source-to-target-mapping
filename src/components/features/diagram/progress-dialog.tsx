@@ -9,6 +9,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import useFlowStore from "@/stores/flow";
@@ -148,10 +149,12 @@ export default function ProgressDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
-        <DialogTitle>Uploading files</DialogTitle>
-        <DialogDescription>
-          {processedFiles} of {fileList.length} files uploaded
-        </DialogDescription>
+        <DialogHeader>
+          <DialogTitle>Uploading files</DialogTitle>
+          <DialogDescription>
+            {processedFiles} of {fileList.length} files uploaded
+          </DialogDescription>
+        </DialogHeader>
         <Progress value={progress} className="w-full" />
       </DialogContent>
     </Dialog>

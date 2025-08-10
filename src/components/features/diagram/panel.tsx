@@ -10,6 +10,7 @@ import { useMutation } from "@tanstack/react-query";
 import alasql from "alasql";
 import { toast } from "sonner";
 import { Panel } from "@xyflow/react";
+import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ProgressDialog from "@/components/features/diagram/progress-dialog";
@@ -71,7 +72,7 @@ export default function AppPanel(): JSX.Element {
           disabled={initializeStatus !== "success"}
           className="cursor-pointer disabled:cursor-not-allowed"
         >
-          Upload Files
+          <Upload />
         </Button>
       </Panel>
       <ProgressDialog
