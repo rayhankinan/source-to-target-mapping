@@ -17,6 +17,8 @@ export type AppState = {
   onConnect: OnConnect;
   addNode: (node: AppNode) => void;
   addEdge: (edge: AppEdge) => void;
+  deleteNode: (id: string) => void;
+  deleteEdge: (id: string) => void;
 };
 
 const useFlowStore = create<AppState>((set, get) => ({
@@ -49,6 +51,12 @@ const useFlowStore = create<AppState>((set, get) => ({
   },
   addEdge: (edge) => {
     set({ edges: [...get().edges, edge] });
+  },
+  deleteNode: (id) => {
+    set({ nodes: get().nodes.filter((node) => node.id !== id) });
+  },
+  deleteEdge: (id) => {
+    set({ edges: get().edges.filter((edge) => edge.id !== id) });
   },
 }));
 

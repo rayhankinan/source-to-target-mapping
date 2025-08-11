@@ -12,7 +12,7 @@ import {
 import { useAsyncQueuer } from "@tanstack/react-pacer/async-queuer";
 import { useShallow } from "zustand/react/shallow";
 import useFlowStore from "@/stores/flow";
-import { Rows4 } from "lucide-react";
+import { Rows4, Trash2 } from "lucide-react";
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -38,7 +38,7 @@ export default function AppFlow(): JSX.Element {
   const [expandedNode, setExpandedNode] = useState<AppNode | null>(null);
   const [openPreview, setOpenPreview] = useState(false);
 
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect } =
+  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, deleteNode } =
     useFlowStore(
       useShallow((state) => ({
         nodes: state.nodes,
@@ -46,6 +46,7 @@ export default function AppFlow(): JSX.Element {
         onNodesChange: state.onNodesChange,
         onEdgesChange: state.onEdgesChange,
         onConnect: state.onConnect,
+        deleteNode: state.deleteNode,
       }))
     );
 
@@ -133,6 +134,15 @@ export default function AppFlow(): JSX.Element {
                 Preview
                 <ContextMenuShortcut>
                   <Rows4 />
+                </ContextMenuShortcut>
+              </ContextMenuItem>
+              <ContextMenuItem
+                className="cursor-pointer disabled:cursor-not-allowed text-destructive"
+                onClick={() => deleteNode(expandedNode.id)}
+              >
+                Delete
+                <ContextMenuShortcut>
+                  <Trash2 className="stroke-destructive" />
                 </ContextMenuShortcut>
               </ContextMenuItem>
             </ContextMenuContent>
