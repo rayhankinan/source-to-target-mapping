@@ -28,7 +28,13 @@ import { DataEdge } from "@/components/data-edge";
 import AppPanel from "@/components/features/diagram/panel";
 import PreviewDialog from "@/components/features/diagram/preview-dialog";
 import FileNode from "@/components/features/node/file-node";
-import { FILE_NODE_TYPE, TABLE_EDGE_TYPE, type AppNode } from "@/types/flow";
+import UnionNode from "@/components/features/node/union-node";
+import {
+  FILE_NODE_TYPE,
+  TABLE_EDGE_TYPE,
+  UNION_NODE_TYPE,
+  type AppNode,
+} from "@/types/flow";
 import { MIME_TYPES } from "@/const/mime-types";
 
 export default function AppFlow(): JSX.Element {
@@ -173,6 +179,7 @@ export default function AppFlow(): JSX.Element {
             onPaneClick={onPaneClick}
             nodeTypes={{
               [FILE_NODE_TYPE]: FileNode,
+              [UNION_NODE_TYPE]: UnionNode,
             }}
             edgeTypes={{
               [TABLE_EDGE_TYPE]: DataEdge,
@@ -202,7 +209,10 @@ export default function AppFlow(): JSX.Element {
                 onClick={() =>
                   mutateDownload({
                     label: expandedNode.data.label,
-                    type: expandedNode.data.file.type,
+                    type:
+                      expandedNode.type === FILE_NODE_TYPE
+                        ? expandedNode.data.file.type
+                        : MIME_TYPES.CSV,
                   })
                 }
               >
@@ -213,7 +223,7 @@ export default function AppFlow(): JSX.Element {
               </ContextMenuItem>
             </ContextMenuContent>
             <PreviewDialog
-              data={expandedNode.data}
+              node={expandedNode}
               open={openPreview}
               onOpenChange={setOpenPreview}
             />

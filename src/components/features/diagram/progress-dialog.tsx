@@ -13,10 +13,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import useFlowStore from "@/stores/flow";
-import { type FileNode } from "@/types/flow";
 import { sanitizeTableName } from "@/utils/sanitize";
 import { MIME_TYPES } from "@/const/mime-types";
 import { Progress } from "@/components/ui/progress";
+import { FILE_NODE_TYPE } from "@/types/flow";
 
 interface ProgressDialogProps {
   fileList: File[];
@@ -27,31 +27,38 @@ export default function ProgressDialog({
   fileList,
   resetFileList,
 }: ProgressDialogProps): JSX.Element {
-  const { nodes, setNodes } = useFlowStore(
+  const { addNode } = useFlowStore(
     useShallow((state) => ({
-      nodes: state.nodes,
-      setNodes: state.setNodes,
+      addNode: state.addNode,
     }))
   );
 
   const open = useMemo(() => fileList.length > 0, [fileList.length]);
 
   const { mutateAsync: createTableAsync } = useMutation({
-    mutationFn: async ({
-      createQuery,
-      label,
-      file,
-    }: {
-      createQuery: string;
-      label: string;
-      file: File;
-    }) => {
+    mutationFn: async ({ label, file }: { label: string; file: File }) => {
       const objectURL = URL.createObjectURL(file);
 
       try {
         await alasql.promise(`DROP TABLE IF EXISTS ${label}`);
         await alasql.promise(`CREATE TABLE IF NOT EXISTS ${label}`);
-        await alasql.promise(createQuery, [objectURL]);
+        await alasql.promise(
+          match(file.type)
+            .with(
+              MIME_TYPES.CSV,
+              () => `SELECT * INTO ${label} FROM CSV(?, {autoExt: false})` // TODO: Handle CSV with BOM
+            )
+            .with(
+              MIME_TYPES.XLS,
+              () => `SELECT * INTO ${label} FROM XLS(?, {autoExt: false})`
+            )
+            .with(
+              MIME_TYPES.XLSX,
+              () => `SELECT * INTO ${label} FROM XLSX(?, {autoExt: false})`
+            )
+            .otherwise(() => `SELECT * INTO ${label} FROM ?`),
+          [objectURL]
+        );
       } finally {
         URL.revokeObjectURL(objectURL);
       }
@@ -62,32 +69,18 @@ export default function ProgressDialog({
   });
 
   const { addItem, reset, state } = useAsyncQueuer(
-    async ({
-      id,
-      createQuery,
-      label,
-      file,
-    }: {
-      id: string;
-      createQuery: string;
-      label: string;
-      file: File;
-    }) => {
+    async ({ id, label, file }: { id: string; label: string; file: File }) => {
       await createTableAsync({
-        createQuery,
         label,
         file,
       });
 
-      setNodes([
-        ...nodes,
-        {
-          id,
-          position: { x: 0, y: 0 },
-          type: "file",
-          data: { label, file },
-        } satisfies FileNode,
-      ]);
+      addNode({
+        id,
+        position: { x: 0, y: 0 },
+        type: FILE_NODE_TYPE,
+        data: { label, file },
+      });
     },
     {
       concurrency: 1,
@@ -123,25 +116,10 @@ export default function ProgressDialog({
   useEffect(() => {
     Array.from(fileList.length > 0 ? fileList : []).forEach((file) => {
       const tableName = sanitizeTableName(file.name);
-      const createQuery = match(file.type)
-        .with(
-          MIME_TYPES.CSV,
-          () => `SELECT * INTO ${tableName} FROM CSV(?, {autoExt: false})` // TODO: Handle CSV with BOM
-        )
-        .with(
-          MIME_TYPES.XLS,
-          () => `SELECT * INTO ${tableName} FROM XLS(?, {autoExt: false})`
-        )
-        .with(
-          MIME_TYPES.XLSX,
-          () => `SELECT * INTO ${tableName} FROM XLSX(?, {autoExt: false})`
-        )
-        .otherwise(() => `SELECT * INTO ${tableName} FROM ?`);
 
       addItem({
         id: tableName,
         label: tableName,
-        createQuery,
         file,
       });
     });

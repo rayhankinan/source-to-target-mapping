@@ -5,15 +5,15 @@ import { type ColumnDef } from "@tanstack/react-table";
 import DataTable from "@/components/features/table/data-table";
 import DataTableColumnHeader from "@/components/features/table/data-table-column-header";
 import selectableColumn from "@/components/features/table/columns";
-import type { NodeData } from "@/types/flow";
+import type { AppNode } from "@/types/flow";
 
 interface PreviewProps {
-  data: NodeData;
+  node: AppNode;
 }
 
-export default function Preview({ data }: PreviewProps): JSX.Element {
+export default function Preview({ node }: PreviewProps): JSX.Element {
   const [selectQuery, setSelectQuery] = useState<string>(
-    `SELECT * FROM ${data.label}`
+    `SELECT * FROM ${node.data.label}`
   );
 
   const fetchStatus = useQuery({

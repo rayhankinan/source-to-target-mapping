@@ -15,8 +15,8 @@ export type AppState = {
   onNodesChange: OnNodesChange<AppNode>;
   onEdgesChange: OnEdgesChange<AppEdge>;
   onConnect: OnConnect;
-  setNodes: (nodes: AppNode[]) => void;
-  setEdges: (edges: AppEdge[]) => void;
+  addNode: (node: AppNode) => void;
+  addEdge: (edge: AppEdge) => void;
 };
 
 const useFlowStore = create<AppState>((set, get) => ({
@@ -44,11 +44,11 @@ const useFlowStore = create<AppState>((set, get) => ({
       ),
     });
   },
-  setNodes: (nodes) => {
-    set({ nodes });
+  addNode: (node) => {
+    set({ nodes: [...get().nodes, node] });
   },
-  setEdges: (edges) => {
-    set({ edges });
+  addEdge: (edge) => {
+    set({ edges: [...get().edges, edge] });
   },
 }));
 
