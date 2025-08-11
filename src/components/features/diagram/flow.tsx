@@ -119,8 +119,7 @@ export default function AppFlow(): JSX.Element {
         URL.revokeObjectURL(url);
       }
     },
-    onError: (error, { label }) => {
-      console.error(error);
+    onError: (_, { label }) => {
       toast.error(`Failed to download the file ${label}.`);
     },
   });
