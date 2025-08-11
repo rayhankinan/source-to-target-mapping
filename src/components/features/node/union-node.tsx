@@ -20,7 +20,7 @@ import {
 import { LabeledHandle } from "@/components/labeled-handle";
 import { type AppNode, type UnionNode } from "@/types/flow";
 
-function getInternalFileNode(
+function getSQL(
   connections: NodeConnection[],
   nodeLookup: Map<string, InternalNode<Node>>
 ): string {
@@ -38,7 +38,7 @@ export default function UnionNode({
   const { getNodeConnections } = useReactFlow();
 
   const { qA, qB } = useStore((state) => ({
-    qA: getInternalFileNode(
+    qA: getSQL(
       getNodeConnections({
         nodeId: id,
         type: "target",
@@ -46,7 +46,7 @@ export default function UnionNode({
       }),
       state.nodeLookup
     ),
-    qB: getInternalFileNode(
+    qB: getSQL(
       getNodeConnections({
         nodeId: id,
         type: "target",
