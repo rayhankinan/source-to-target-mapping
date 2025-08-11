@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import useFlowStore from "@/stores/flow";
-import type { AppNode } from "@/types/flow";
+import { type FileNode } from "@/types/flow";
 import { sanitizeTableName } from "@/utils/sanitize";
 import { MIME_TYPES } from "@/const/mime-types";
 import { Progress } from "@/components/ui/progress";
@@ -86,7 +86,7 @@ export default function ProgressDialog({
           position: { x: 0, y: 0 },
           type: "file",
           data: { label, file },
-        } satisfies AppNode,
+        } satisfies FileNode,
       ]);
     },
     {

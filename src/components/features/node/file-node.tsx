@@ -1,4 +1,4 @@
-import { type Node, type NodeProps, Position } from "@xyflow/react";
+import { type NodeProps, Position } from "@xyflow/react";
 import {
   BaseNode,
   BaseNodeContent,
@@ -7,17 +7,7 @@ import {
   BaseNodeHeaderTitle,
 } from "@/components/base-node";
 import { LabeledHandle } from "@/components/labeled-handle";
-
-export type FileNodeData = {
-  label: string;
-  file: File;
-};
-
-export const FILE_NODE_TYPE = "file";
-
-export type FileNodeType = typeof FILE_NODE_TYPE;
-
-export type FileNode = Node<FileNodeData, FileNodeType>;
+import { type FileNode } from "@/types/flow";
 
 export default function FileNode({ data }: NodeProps<FileNode>) {
   return (

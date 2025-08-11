@@ -24,10 +24,11 @@ import {
   ContextMenuItem,
   ContextMenuShortcut,
 } from "@/components/ui/context-menu";
+import { DataEdge } from "@/components/data-edge";
 import AppPanel from "@/components/features/diagram/panel";
 import PreviewDialog from "@/components/features/diagram/preview-dialog";
-import FileNode, { FILE_NODE_TYPE } from "@/components/features/node/file-node";
-import type { AppNode } from "@/types/flow";
+import FileNode from "@/components/features/node/file-node";
+import { FILE_NODE_TYPE, TABLE_EDGE_TYPE, type AppNode } from "@/types/flow";
 import { MIME_TYPES } from "@/const/mime-types";
 
 export default function AppFlow(): JSX.Element {
@@ -172,6 +173,9 @@ export default function AppFlow(): JSX.Element {
             onPaneClick={onPaneClick}
             nodeTypes={{
               [FILE_NODE_TYPE]: FileNode,
+            }}
+            edgeTypes={{
+              [TABLE_EDGE_TYPE]: DataEdge,
             }}
             fitView
           >

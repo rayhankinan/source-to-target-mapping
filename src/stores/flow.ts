@@ -1,4 +1,4 @@
-import type { AppEdge, AppNode } from "@/types/flow";
+import { TABLE_EDGE_TYPE, type AppEdge, type AppNode } from "@/types/flow";
 import {
   type OnNodesChange,
   type OnEdgesChange,
@@ -34,7 +34,14 @@ const useFlowStore = create<AppState>((set, get) => ({
   },
   onConnect: (connection) => {
     set({
-      edges: addEdge(connection, get().edges),
+      edges: addEdge(
+        {
+          type: TABLE_EDGE_TYPE,
+          data: { key: "label" },
+          ...connection,
+        },
+        get().edges
+      ),
     });
   },
   setNodes: (nodes) => {
