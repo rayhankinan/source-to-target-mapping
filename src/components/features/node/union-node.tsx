@@ -18,7 +18,7 @@ import {
   BaseNodeHeaderTitle,
 } from "@/components/base-node";
 import { LabeledHandle } from "@/components/labeled-handle";
-import { FILE_NODE_TYPE, type FileNode, type UnionNode } from "@/types/flow";
+import { type AppNode, type UnionNode } from "@/types/flow";
 
 function getInternalFileNode(
   connections: NodeConnection[],
@@ -26,10 +26,7 @@ function getInternalFileNode(
 ): string {
   return connections
     .map((connection) => nodeLookup.get(connection.source))
-    .filter(
-      (node): node is InternalNode<FileNode> =>
-        node !== undefined && node.type === FILE_NODE_TYPE
-    )
+    .filter((node): node is InternalNode<AppNode> => node !== undefined)
     .map((node) => `SELECT * FROM ${node.data.label}`)
     .join(" UNION ALL ");
 }
