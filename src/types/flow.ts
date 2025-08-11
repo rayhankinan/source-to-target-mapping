@@ -17,6 +17,9 @@ export const UNION_NODE_TYPE = "union";
 export type UnionNodeType = typeof UNION_NODE_TYPE;
 export type UnionNode = Node<UnionNodeData, UnionNodeType>;
 
+// TODO: Add other table operation on this type
+export type TableNodeType = UnionNodeType;
+
 export const TABLE_EDGE_TYPE = "table";
 export type TableEdgeType = typeof TABLE_EDGE_TYPE;
 

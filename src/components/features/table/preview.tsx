@@ -1,10 +1,9 @@
 import { useMemo, useState, type JSX } from "react";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import alasql from "alasql";
 import { type ColumnDef } from "@tanstack/react-table";
 import DataTable from "@/components/features/table/data-table";
 import DataTableColumnHeader from "@/components/features/table/data-table-column-header";
 import selectableColumn from "@/components/features/table/columns";
+import useTableRecords from "@/hooks/useTableRecords";
 import type { AppNode } from "@/types/flow";
 
 interface PreviewProps {
@@ -16,11 +15,7 @@ export default function Preview({ node }: PreviewProps): JSX.Element {
     `SELECT * FROM ${node.data.label}`
   );
 
-  const fetchStatus = useQuery({
-    queryKey: [selectQuery],
-    queryFn: async () => alasql.promise<Record<string, unknown>[]>(selectQuery),
-    placeholderData: keepPreviousData,
-  });
+  const fetchStatus = useTableRecords(selectQuery);
 
   const dynamicColumns = useMemo<ColumnDef<Record<string, unknown>>[]>(
     () =>
