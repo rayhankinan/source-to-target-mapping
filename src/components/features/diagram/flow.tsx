@@ -5,6 +5,7 @@ import {
   Controls,
   MiniMap,
   ReactFlow,
+  type IsValidConnection,
   type NodeMouseHandler,
   type OnNodesDelete,
 } from "@xyflow/react";
@@ -33,6 +34,7 @@ import {
   FILE_NODE_TYPE,
   TABLE_EDGE_TYPE,
   UNION_NODE_TYPE,
+  type AppEdge,
   type AppNode,
 } from "@/types/flow";
 import { MIME_TYPES } from "@/const/mime-types";
@@ -163,6 +165,19 @@ export default function AppFlow(): JSX.Element {
     [setExpandedNode]
   );
 
+  const isValidConnection: IsValidConnection<AppEdge> = useCallback(
+    (connection) => {
+      const isTargetConnected = edges.some(
+        (edge) =>
+          edge.target === connection.target &&
+          edge.targetHandle === connection.targetHandle
+      );
+
+      return !isTargetConnected;
+    },
+    [edges]
+  );
+
   return (
     <div className="container mx-auto h-full rounded-md border">
       <ContextMenu>
@@ -176,6 +191,7 @@ export default function AppFlow(): JSX.Element {
             onConnect={onConnect}
             onNodeContextMenu={onNodeContextMenu}
             onPaneClick={onPaneClick}
+            isValidConnection={isValidConnection}
             nodeTypes={{
               [FILE_NODE_TYPE]: FileNode,
               [UNION_NODE_TYPE]: UnionNode,
