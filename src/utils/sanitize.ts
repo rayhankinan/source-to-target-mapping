@@ -1,6 +1,10 @@
 import _ from "lodash";
 
-/** Remove file extension and invalid characters */
+/**
+ * Sanitize a table name by removing invalid characters and ensuring uniqueness.
+ * @param filename The original table name.
+ * @returns The sanitized table name.
+ */
 export function sanitizeTableName(filename: string): string {
   const nameWithoutExt = filename.replace(/\.[^/.]+$/, ""); // Strip extension
   const sanitized = nameWithoutExt.replace(/[^a-zA-Z0-9_]/g, "_"); // Replace special chars

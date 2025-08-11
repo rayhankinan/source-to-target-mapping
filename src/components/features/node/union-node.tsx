@@ -1,8 +1,5 @@
 import { useCallback, useEffect, type JSX } from "react";
 import {
-  type InternalNode,
-  type Node,
-  type NodeConnection,
   type NodeProps,
   Position,
   useReactFlow,
@@ -28,19 +25,9 @@ import { LabeledHandle } from "@/components/labeled-handle";
 import useDownloadTable from "@/hooks/useDownloadTable";
 import useUnionTable from "@/hooks/useUnionTable";
 import useClearTable from "@/hooks/useClearTable";
-import { type AppNode, type UnionNode } from "@/types/flow";
+import { type UnionNode } from "@/types/flow";
 import { MIME_TYPES } from "@/const/mime-types";
-
-function getSQL(
-  connections: NodeConnection[],
-  nodeLookup: Map<string, InternalNode<Node>>
-): string {
-  return connections
-    .map((connection) => nodeLookup.get(connection.source))
-    .filter((node): node is InternalNode<AppNode> => node !== undefined)
-    .map((node) => `SELECT * FROM ${node.data.label}`)
-    .join(" UNION ALL ");
-}
+import { getUnionSQL } from "@/utils/sql";
 
 export default function UnionNode({
   id,
@@ -49,7 +36,7 @@ export default function UnionNode({
   const { getNodeConnections } = useReactFlow();
 
   const { qA, qB } = useStore((state) => ({
-    qA: getSQL(
+    qA: getUnionSQL(
       getNodeConnections({
         nodeId: id,
         type: "target",
@@ -57,7 +44,7 @@ export default function UnionNode({
       }),
       state.nodeLookup
     ),
-    qB: getSQL(
+    qB: getUnionSQL(
       getNodeConnections({
         nodeId: id,
         type: "target",
