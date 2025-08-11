@@ -84,6 +84,7 @@ export default function ProgressDialog({
         {
           id,
           position: { x: 0, y: 0 },
+          type: "file",
           data: { label, file },
         } satisfies AppNode,
       ]);

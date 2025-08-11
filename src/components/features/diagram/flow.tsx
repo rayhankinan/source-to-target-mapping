@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/context-menu";
 import AppPanel from "@/components/features/diagram/panel";
 import PreviewDialog from "@/components/features/diagram/preview-dialog";
+import FileNode, { FILE_NODE_TYPE } from "@/components/features/node/file-node";
 import type { AppNode } from "@/types/flow";
 import { MIME_TYPES } from "@/const/mime-types";
 
@@ -169,6 +170,9 @@ export default function AppFlow(): JSX.Element {
             onConnect={onConnect}
             onNodeContextMenu={onNodeContextMenu}
             onPaneClick={onPaneClick}
+            nodeTypes={{
+              [FILE_NODE_TYPE]: FileNode,
+            }}
             fitView
           >
             <AppPanel />
