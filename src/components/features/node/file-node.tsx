@@ -1,5 +1,4 @@
-import { useCallback } from "react";
-
+import { useCallback, type JSX } from "react";
 import { type NodeProps, Position } from "@xyflow/react";
 import { Download, EllipsisVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,7 +21,7 @@ import { LabeledHandle } from "@/components/labeled-handle";
 import useDownloadTable from "@/hooks/useDownloadTable";
 import { type FileNode } from "@/types/flow";
 
-export default function FileNode({ data }: NodeProps<FileNode>) {
+export default function FileNode({ data }: NodeProps<FileNode>): JSX.Element {
   const { mutate: downloadTable } = useDownloadTable();
 
   const onClickDownload = useCallback(() => {
