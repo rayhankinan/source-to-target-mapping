@@ -7,15 +7,21 @@ import {
   type JSX,
 } from "react";
 import { Panel } from "@xyflow/react";
-import { Upload, Merge } from "lucide-react";
+import { Upload, Merge, X } from "lucide-react";
 import _ from "lodash";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import ProgressDialog from "@/components/features/diagram/progress-dialog";
 import useInitializeDatabase from "@/hooks/useInitializeDatabase";
 import useCreateTableNode from "@/hooks/useCreateTableNode";
 import { MIME_TYPES } from "@/const/mime-types";
-import { UNION_NODE_TYPE } from "@/types/flow";
+import { JOIN_NODE_TYPE, UNION_NODE_TYPE } from "@/types/flow";
 
 export default function AppPanel(): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -35,7 +41,7 @@ export default function AppPanel(): JSX.Element {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
 
-      setFileList(files ? Array.from(files) : []);
+      setFileList(files !== null ? Array.from(files) : []);
 
       e.target.value = ""; // Reset input value to allow re-uploading the same file
     },
@@ -46,7 +52,16 @@ export default function AppPanel(): JSX.Element {
     inputRef.current?.click();
   }, []);
 
-  const onMergeFilesButtonClick = useCallback(async () => {
+  const onCombineTablesButtonClick = useCallback(async () => {
+    const tableName = _.uniqueId("tbl_join_");
+
+    await createTableNodeAsync({
+      label: tableName,
+      type: JOIN_NODE_TYPE,
+    });
+  }, [createTableNodeAsync]);
+
+  const onStackTablesButtonClick = useCallback(async () => {
     const tableName = _.uniqueId("tbl_union_");
 
     await createTableNodeAsync({
@@ -70,20 +85,54 @@ export default function AppPanel(): JSX.Element {
           className="hidden"
           multiple
         />
-        <Button
-          onClick={onUploadFileButtonClick}
-          disabled={initializeStatus !== "success"}
-          className="cursor-pointer disabled:cursor-not-allowed"
-        >
-          <Upload />
-        </Button>
-        <Button
-          onClick={onMergeFilesButtonClick}
-          disabled={initializeStatus !== "success"}
-          className="cursor-pointer disabled:cursor-not-allowed"
-        >
-          <Merge />
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={onUploadFileButtonClick}
+                disabled={initializeStatus !== "success"}
+                className="cursor-pointer disabled:cursor-not-allowed"
+              >
+                <Upload />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Upload files</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={onCombineTablesButtonClick}
+                disabled={initializeStatus !== "success"}
+                className="cursor-pointer disabled:cursor-not-allowed"
+              >
+                <X />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Combine Tables</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={onStackTablesButtonClick}
+                disabled={initializeStatus !== "success"}
+                className="cursor-pointer disabled:cursor-not-allowed"
+              >
+                <Merge />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Stack Tables</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </Panel>
       <ProgressDialog
         fileList={fileList}

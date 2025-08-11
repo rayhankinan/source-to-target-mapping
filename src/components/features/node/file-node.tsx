@@ -36,7 +36,7 @@ export default function FileNode({ data }: NodeProps<FileNode>) {
     <BaseNode>
       <BaseNodeHeader className="flex flex-row w-full gap-2 border-b">
         <BaseNodeHeaderTitle className="text-md font-bold font-mono">
-          Source
+          Source Table
         </BaseNodeHeaderTitle>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -63,7 +63,7 @@ export default function FileNode({ data }: NodeProps<FileNode>) {
           </DropdownMenuContent>
         </DropdownMenu>
       </BaseNodeHeader>
-      <BaseNodeContent className="flex flex-row w-full">
+      <BaseNodeContent className="flex flex-col w-full">
         <p className="text-xs font-normal font-mono">
           {data.label} ({data.file.name})
         </p>

@@ -25,9 +25,11 @@ import AppPanel from "@/components/features/diagram/panel";
 import PreviewDialog from "@/components/features/diagram/preview-dialog";
 import FileNode from "@/components/features/node/file-node";
 import UnionNode from "@/components/features/node/union-node";
+import JoinNode from "@/components/features/node/join-node";
 import useDropTable from "@/hooks/useDropTable";
 import {
   FILE_NODE_TYPE,
+  JOIN_NODE_TYPE,
   TABLE_EDGE_TYPE,
   UNION_NODE_TYPE,
   type AppEdge,
@@ -112,6 +114,7 @@ export default function AppFlow(): JSX.Element {
             nodeTypes={{
               [FILE_NODE_TYPE]: FileNode,
               [UNION_NODE_TYPE]: UnionNode,
+              [JOIN_NODE_TYPE]: JoinNode,
             }}
             edgeTypes={{
               [TABLE_EDGE_TYPE]: DataEdge,

@@ -17,11 +17,15 @@ export const UNION_NODE_TYPE = "union";
 export type UnionNodeType = typeof UNION_NODE_TYPE;
 export type UnionNode = Node<UnionNodeData, UnionNodeType>;
 
-// TODO: Add other table operation on this type
-export type TableNodeType = UnionNodeType;
+export type JoinNodeData = BasicNodeData;
+export const JOIN_NODE_TYPE = "join";
+export type JoinNodeType = typeof JOIN_NODE_TYPE;
+export type JoinNode = Node<JoinNodeData, JoinNodeType>;
+
+export type TableNodeType = UnionNodeType | JoinNodeType;
 
 export const TABLE_EDGE_TYPE = "table";
 export type TableEdgeType = typeof TABLE_EDGE_TYPE;
 
-export type AppNode = FileNode | UnionNode;
+export type AppNode = FileNode | UnionNode | JoinNode;
 export type AppEdge = DataEdge<AppNode>;

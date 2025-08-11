@@ -1,4 +1,4 @@
-import { useCallback, useEffect, type JSX } from "react";
+import { useCallback, useEffect, useState, type JSX } from "react";
 import {
   type NodeProps,
   Position,
@@ -15,6 +15,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { InputTags } from "@/components/ui/input-tags";
 import {
   BaseNode,
   BaseNodeContent,
@@ -23,16 +24,18 @@ import {
 } from "@/components/base-node";
 import { LabeledHandle } from "@/components/labeled-handle";
 import useDownloadTable from "@/hooks/useDownloadTable";
-import useUnionTable from "@/hooks/useUnionTable";
+import useJoinTable from "@/hooks/useJoinTable";
 import useClearTable from "@/hooks/useClearTable";
-import { type UnionNode } from "@/types/flow";
+import { type JoinNode } from "@/types/flow";
 import { MIME_TYPES } from "@/const/mime-types";
 import { getUnionSQL } from "@/utils/sql";
 
-export default function UnionNode({
+export default function JoinNode({
   id,
   data,
-}: NodeProps<UnionNode>): JSX.Element {
+}: NodeProps<JoinNode>): JSX.Element {
+  const [columns, setColumns] = useState<string[]>([]);
+
   const { getNodeConnections } = useReactFlow();
   const { qA, qB } = useStore((state) => ({
     qA: getUnionSQL(
@@ -54,7 +57,7 @@ export default function UnionNode({
   }));
 
   const { mutate: downloadTable } = useDownloadTable();
-  const { mutate: unionTable } = useUnionTable();
+  const { mutate: joinTable } = useJoinTable();
   const { mutate: clearTable } = useClearTable();
 
   const onClickDownload = useCallback(() => {
@@ -65,36 +68,38 @@ export default function UnionNode({
   }, [data.label, downloadTable]);
 
   const onClickUpdate = useCallback(() => {
-    if (qA.length === 0 || qB.length === 0) {
+    if (qA.length === 0 || qB.length === 0 || columns.length === 0) {
       clearTable({ label: data.label });
       return;
     }
 
-    unionTable({
+    joinTable({
       label: data.label,
       qA,
       qB,
+      columns,
     });
-  }, [qA, qB, data.label, unionTable, clearTable]);
+  }, [qA, qB, columns, data.label, joinTable, clearTable]);
 
   useEffect(() => {
-    if (qA.length === 0 || qB.length === 0) {
+    if (qA.length === 0 || qB.length === 0 || columns.length === 0) {
       clearTable({ label: data.label });
       return;
     }
 
-    unionTable({
+    joinTable({
       label: data.label,
       qA,
       qB,
+      columns,
     });
-  }, [qA, qB, data.label, unionTable, clearTable]);
+  }, [qA, qB, columns, data.label, joinTable, clearTable]);
 
   return (
     <BaseNode>
       <BaseNodeHeader className="flex flex-row w-full gap-2 border-b">
         <BaseNodeHeaderTitle className="flex flex-row items-center text-md font-bold font-mono">
-          Stack Tables
+          Combine Tables
         </BaseNodeHeaderTitle>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -130,8 +135,9 @@ export default function UnionNode({
           </DropdownMenuContent>
         </DropdownMenu>
       </BaseNodeHeader>
-      <BaseNodeContent className="flex flex-col w-full">
+      <BaseNodeContent className="flex flex-col w-full gap-2">
         <p className="text-xs font-normal font-mono">{data.label}</p>
+        <InputTags value={columns} onChange={setColumns} />
       </BaseNodeContent>
       <footer className="border-t w-full">
         <LabeledHandle
