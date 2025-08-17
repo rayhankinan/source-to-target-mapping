@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
 import { Panel } from "@xyflow/react";
 import { Upload, Merge, X } from "lucide-react";
 import { uniqueId } from "lodash";
+import log from "loglevel";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,24 +35,28 @@ export default function AppPanel(): JSX.Element {
   );
 
   const onUploadFileButtonClick = useCallback(async () => {
-    const fileHandles = await window.showOpenFilePicker({
-      multiple: true,
-      types: [
-        {
-          description: "Spreadsheet files",
-          accept: {
-            [MIME_TYPES.CSV]: [".csv"],
-            [MIME_TYPES.XLSX]: [".xlsx"],
+    try {
+      const fileHandles = await window.showOpenFilePicker({
+        multiple: true,
+        types: [
+          {
+            description: "Spreadsheet files",
+            accept: {
+              [MIME_TYPES.CSV]: [".csv"],
+              [MIME_TYPES.XLSX]: [".xlsx"],
+            },
           },
-        },
-      ],
-    });
+        ],
+      });
 
-    const files = await Promise.all(
-      fileHandles.map(async (fileHandle) => await fileHandle.getFile())
-    );
+      const files = await Promise.all(
+        fileHandles.map(async (fileHandle) => await fileHandle.getFile())
+      );
 
-    setFileList(files);
+      setFileList(files);
+    } catch (error) {
+      log.warn(error);
+    }
   }, []);
 
   const onCombineTablesButtonClick = useCallback(async () => {
