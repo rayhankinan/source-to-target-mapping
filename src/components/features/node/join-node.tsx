@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useState, type JSX } from "react";
+import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
 import {
   type NodeProps,
   Position,
   useReactFlow,
   useStore,
 } from "@xyflow/react";
-import { Download, EllipsisVertical, RotateCcw } from "lucide-react";
+import { Download, EllipsisVertical, RotateCcw, Rows4 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -23,18 +23,19 @@ import {
   BaseNodeHeaderTitle,
 } from "@/components/base-node";
 import { LabeledHandle } from "@/components/labeled-handle";
-import useDownloadTable from "@/hooks/useDownloadTable";
+import PreviewDialog from "@/components/features/diagram/preview-dialog";
+import useDownloadTableNode from "@/hooks/useDownloadTableNode";
 import useJoinTable from "@/hooks/useJoinTable";
-import useClearTable from "@/hooks/useClearTable";
 import { type JoinNode } from "@/types/flow";
 import { MIME_TYPES } from "@/const/mime-types";
-import { getUnionSQL } from "@/utils/sql";
+import { getUnionSQL } from "@/lib/sql";
 
 export default function JoinNode({
   id,
   data,
 }: NodeProps<JoinNode>): JSX.Element {
   const [columns, setColumns] = useState<string[]>([]);
+  const [openPreview, setOpenPreview] = useState(false);
 
   const { getNodeConnections } = useReactFlow();
   const { qA, qB } = useStore((state) => ({
@@ -56,9 +57,8 @@ export default function JoinNode({
     ),
   }));
 
-  const { mutate: downloadTable } = useDownloadTable();
-  const { mutate: joinTable } = useJoinTable();
-  const { mutate: clearTable } = useClearTable();
+  const { mutate: downloadTable } = useDownloadTableNode();
+  const { mutate: joinTable, status: joinStatus } = useJoinTable();
 
   const onClickDownload = useCallback(() => {
     downloadTable({
@@ -68,24 +68,25 @@ export default function JoinNode({
   }, [data.label, downloadTable]);
 
   const onClickUpdate = useCallback(() => {
-    if (qA.length === 0 || qB.length === 0 || columns.length === 0) {
-      clearTable({ label: data.label });
-      return;
-    }
-
     joinTable({
       label: data.label,
       qA,
       qB,
       columns,
     });
-  }, [qA, qB, columns, data.label, joinTable, clearTable]);
+  }, [qA, qB, columns, data.label, joinTable]);
+
+  const isDisabled = useMemo(
+    () =>
+      qA.length === 0 ||
+      qB.length === 0 ||
+      columns.length === 0 ||
+      joinStatus !== "success",
+    [qA.length, qB.length, columns.length, joinStatus]
+  );
 
   useEffect(() => {
-    if (qA.length === 0 || qB.length === 0 || columns.length === 0) {
-      clearTable({ label: data.label });
-      return;
-    }
+    if (qA.length === 0 || qB.length === 0 || columns.length === 0) return;
 
     joinTable({
       label: data.label,
@@ -93,7 +94,7 @@ export default function JoinNode({
       qB,
       columns,
     });
-  }, [qA, qB, columns, data.label, joinTable, clearTable]);
+  }, [qA, qB, columns, data.label, joinTable]);
 
   return (
     <BaseNode>
@@ -115,7 +116,18 @@ export default function JoinNode({
           <DropdownMenuContent align="start" className="w-48">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
+              onClick={() => setOpenPreview(true)}
+              disabled={isDisabled}
+              className="cursor-pointer disabled:cursor-not-allowed"
+            >
+              Preview File
+              <DropdownMenuShortcut>
+                <Rows4 />
+              </DropdownMenuShortcut>
+            </DropdownMenuItem>
+            <DropdownMenuItem
               onClick={onClickDownload}
+              disabled={isDisabled}
               className="cursor-pointer disabled:cursor-not-allowed"
             >
               Download Table
@@ -125,6 +137,7 @@ export default function JoinNode({
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={onClickUpdate}
+              disabled={isDisabled}
               className="cursor-pointer disabled:cursor-not-allowed"
             >
               Update Table
@@ -154,6 +167,11 @@ export default function JoinNode({
         />
         <LabeledHandle title="out" type="source" position={Position.Right} />
       </footer>
+      <PreviewDialog
+        data={data}
+        open={openPreview}
+        onOpenChange={setOpenPreview}
+      />
     </BaseNode>
   );
 }

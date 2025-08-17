@@ -1,12 +1,17 @@
 import { useMutation } from "@tanstack/react-query";
-import alasql from "alasql";
 import { toast } from "sonner";
+import { db } from "@/utils/db";
 
-export default function useClearTable() {
+export default function useDropTableNode() {
   return useMutation({
     mutationFn: async ({ label }: { label: string }) => {
-      await alasql.promise(`DROP TABLE IF EXISTS ${label}`);
-      await alasql.promise(`CREATE TABLE IF NOT EXISTS ${label}`);
+      const conn = await db.connect();
+
+      try {
+        await conn.query(`DROP TABLE IF EXISTS ${label}`);
+      } finally {
+        await conn.close();
+      }
     },
     onError: (_, { label }) => {
       toast.error(`Failed to drop table ${label}`);

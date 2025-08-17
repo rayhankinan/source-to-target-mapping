@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
-import alasql from "alasql";
 import { toast } from "sonner";
+import { db } from "@/utils/db";
 
 export default function useUnionTable() {
   return useMutation({
@@ -13,18 +13,15 @@ export default function useUnionTable() {
       qA: string;
       qB: string;
     }) => {
-      const dataA = await alasql.promise(qA);
-      const dataB = await alasql.promise(qB);
+      const conn = await db.connect();
 
-      await alasql.promise(`DROP TABLE IF EXISTS ${label}`);
-      await alasql.promise(`CREATE TABLE IF NOT EXISTS ${label}`);
-
-      const dataRes = await alasql.promise(
-        `SELECT * FROM ? UNION ALL SELECT * FROM ?`,
-        [dataA, dataB]
-      );
-
-      await alasql.promise(`SELECT * INTO ${label} FROM ?`, [dataRes]);
+      try {
+        await conn.query(
+          `CREATE OR REPLACE TABLE ${label} AS (SELECT * FROM (${qA}) AS A UNION ALL SELECT * FROM (${qB}) AS B)`
+        );
+      } finally {
+        await conn.close();
+      }
     },
     onError: (_, { label }) => {
       toast.error(`Error updating table data for ${label}`);

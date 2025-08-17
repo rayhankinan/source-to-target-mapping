@@ -1,5 +1,5 @@
 import type { InternalNode, Node, NodeConnection } from "@xyflow/react";
-import type { AppNode } from "@/types/flow";
+import { type FileNode, type JoinNode, type UnionNode } from "@/types/flow";
 
 /**
  * Generate a SQL UNION ALL query from the given node connections.
@@ -13,7 +13,14 @@ export function getUnionSQL(
 ): string {
   return connections
     .map((connection) => nodeLookup.get(connection.source))
-    .filter((node): node is InternalNode<AppNode> => node !== undefined)
-    .map((node) => `SELECT * FROM ${node.data.label}`)
+    .filter(
+      (
+        node
+      ): node is
+        | InternalNode<FileNode>
+        | InternalNode<UnionNode>
+        | InternalNode<JoinNode> => node !== undefined
+    )
+    .map((node) => `SELECT * FROM "${node.data.label}"`)
     .join(" UNION ALL ");
 }

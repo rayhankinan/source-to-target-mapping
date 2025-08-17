@@ -1,10 +1,20 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import alasql from "alasql";
+import { db } from "@/utils/db";
 
 export default function useTableRecords(selectQuery: string) {
   return useQuery({
     queryKey: [selectQuery],
-    queryFn: async () => alasql.promise<Record<string, unknown>[]>(selectQuery),
+    queryFn: async () => {
+      const conn = await db.connect();
+
+      try {
+        const arrowResult = await conn.query(selectQuery);
+        const result = arrowResult.toArray().map((row) => row.toJSON());
+        return result;
+      } finally {
+        await conn.close();
+      }
+    },
     placeholderData: keepPreviousData,
   });
 }

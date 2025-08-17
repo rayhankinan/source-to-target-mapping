@@ -1,6 +1,6 @@
-import { useCallback, type JSX } from "react";
+import { useCallback, useState, type JSX } from "react";
 import { type NodeProps, Position } from "@xyflow/react";
-import { Download, EllipsisVertical } from "lucide-react";
+import { Download, EllipsisVertical, Rows4 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -18,18 +18,20 @@ import {
   BaseNodeHeaderTitle,
 } from "@/components/base-node";
 import { LabeledHandle } from "@/components/labeled-handle";
-import useDownloadTable from "@/hooks/useDownloadTable";
+import PreviewDialog from "@/components/features/diagram/preview-dialog";
+import useDownloadFileNode from "@/hooks/useDownloadFileNode";
 import { type FileNode } from "@/types/flow";
 
 export default function FileNode({ data }: NodeProps<FileNode>): JSX.Element {
-  const { mutate: downloadTable } = useDownloadTable();
+  const [openPreview, setOpenPreview] = useState(false);
+
+  const { mutate: downloadFile } = useDownloadFileNode();
 
   const onClickDownload = useCallback(() => {
-    downloadTable({
-      label: data.label,
-      type: data.file.type,
+    downloadFile({
+      file: data.file,
     });
-  }, [data.file.type, data.label, downloadTable]);
+  }, [data.file, downloadFile]);
 
   return (
     <BaseNode>
@@ -51,10 +53,19 @@ export default function FileNode({ data }: NodeProps<FileNode>): JSX.Element {
           <DropdownMenuContent align="start" className="w-48">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
+              onClick={() => setOpenPreview(true)}
+              className="cursor-pointer disabled:cursor-not-allowed"
+            >
+              Preview File
+              <DropdownMenuShortcut>
+                <Rows4 />
+              </DropdownMenuShortcut>
+            </DropdownMenuItem>
+            <DropdownMenuItem
               onClick={onClickDownload}
               className="cursor-pointer disabled:cursor-not-allowed"
             >
-              Download Table
+              Download File
               <DropdownMenuShortcut>
                 <Download />
               </DropdownMenuShortcut>
@@ -63,13 +74,16 @@ export default function FileNode({ data }: NodeProps<FileNode>): JSX.Element {
         </DropdownMenu>
       </BaseNodeHeader>
       <BaseNodeContent className="flex flex-col w-full">
-        <p className="text-xs font-normal font-mono">
-          {data.label} ({data.file.name})
-        </p>
+        <p className="text-xs font-normal font-mono">{data.file.name}</p>
       </BaseNodeContent>
       <BaseNodeFooter className="items-end px-0 w-full">
         <LabeledHandle title="out" type="source" position={Position.Right} />
       </BaseNodeFooter>
+      <PreviewDialog
+        data={data}
+        open={openPreview}
+        onOpenChange={setOpenPreview}
+      />
     </BaseNode>
   );
 }

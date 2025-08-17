@@ -4,15 +4,15 @@ import DataTable from "@/components/features/table/data-table";
 import DataTableColumnHeader from "@/components/features/table/data-table-column-header";
 import selectableColumn from "@/components/features/table/columns";
 import useTableRecords from "@/hooks/useTableRecords";
-import type { AppNode } from "@/types/flow";
+import type { AppNodeData } from "@/types/flow";
 
 interface PreviewProps {
-  node: AppNode;
+  data: AppNodeData;
 }
 
-export default function Preview({ node }: PreviewProps): JSX.Element {
+export default function Preview({ data }: PreviewProps): JSX.Element {
   const [selectQuery, setSelectQuery] = useState<string>(
-    `SELECT * FROM ${node.data.label}`
+    () => `SELECT * FROM "${data.label}"`
   );
 
   const fetchStatus = useTableRecords(selectQuery);

@@ -7,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { sanitizeTableName } from "@/utils/sanitize";
 import { Progress } from "@/components/ui/progress";
 import useCreateFileNode from "@/hooks/useCreateFileNode";
 
@@ -25,9 +24,8 @@ export default function ProgressDialog({
   const { mutateAsync: createFileNodeAsync } = useCreateFileNode();
 
   const { addItem, reset, state } = useAsyncQueuer(
-    async ({ label, file }: { label: string; file: File }) => {
+    async ({ file }: { file: File }) => {
       await createFileNodeAsync({
-        label,
         file,
       });
     },
@@ -64,10 +62,7 @@ export default function ProgressDialog({
 
   useEffect(() => {
     Array.from(fileList.length > 0 ? fileList : []).forEach((file) => {
-      const tableName = sanitizeTableName(file.name);
-
       addItem({
-        label: tableName,
         file,
       });
     });

@@ -23,6 +23,8 @@ export type JoinNodeType = typeof JOIN_NODE_TYPE;
 export type JoinNode = Node<JoinNodeData, JoinNodeType>;
 
 export type TableNodeType = UnionNodeType | JoinNodeType;
+export type AppNodeType = FileNodeType | UnionNodeType | JoinNodeType;
+export type AppNodeData = FileNodeData | UnionNodeData | JoinNodeData;
 
 export const TABLE_EDGE_TYPE = "table";
 export type TableEdgeType = typeof TABLE_EDGE_TYPE;

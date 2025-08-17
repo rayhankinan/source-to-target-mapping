@@ -1,14 +1,14 @@
 import { useMutation } from "@tanstack/react-query";
-import alasql from "alasql";
 import { toast } from "sonner";
+import { db } from "@/utils/db";
 
-export default function useDropTable() {
+export default function useDropFileNode() {
   return useMutation({
     mutationFn: async ({ label }: { label: string }) => {
-      await alasql.promise(`DROP TABLE IF EXISTS ${label}`);
+      await db.dropFile(label);
     },
     onError: (_, { label }) => {
-      toast.error(`Failed to drop table ${label}`);
+      toast.error(`Failed to drop file ${label}`);
     },
   });
 }

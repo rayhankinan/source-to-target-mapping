@@ -10,16 +10,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import Preview from "@/components/features/table/preview";
-import type { AppNode } from "@/types/flow";
+import type { AppNodeData } from "@/types/flow";
 
 interface PreviewDialogProps {
-  node: AppNode;
+  data: AppNodeData;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 export default function PreviewDialog({
-  node,
+  data,
   open,
   onOpenChange,
 }: PreviewDialogProps): JSX.Element {
@@ -28,9 +28,9 @@ export default function PreviewDialog({
       <DialogContent className="min-w-fit">
         <DialogHeader>
           <DialogTitle>Preview Table</DialogTitle>
-          <DialogDescription>{node.data.label}</DialogDescription>
+          <DialogDescription>{data.label}</DialogDescription>
         </DialogHeader>
-        <Preview node={node} />
+        <Preview data={data} />
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline">Close</Button>

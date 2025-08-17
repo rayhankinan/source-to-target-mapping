@@ -1,11 +1,11 @@
-import { useCallback, useEffect, type JSX } from "react";
+import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
 import {
   type NodeProps,
   Position,
   useReactFlow,
   useStore,
 } from "@xyflow/react";
-import { Download, EllipsisVertical, RotateCcw } from "lucide-react";
+import { Download, EllipsisVertical, RotateCcw, Rows4 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -22,17 +22,19 @@ import {
   BaseNodeHeaderTitle,
 } from "@/components/base-node";
 import { LabeledHandle } from "@/components/labeled-handle";
-import useDownloadTable from "@/hooks/useDownloadTable";
+import PreviewDialog from "@/components/features/diagram/preview-dialog";
+import useDownloadTableNode from "@/hooks/useDownloadTableNode";
 import useUnionTable from "@/hooks/useUnionTable";
-import useClearTable from "@/hooks/useClearTable";
 import { type UnionNode } from "@/types/flow";
 import { MIME_TYPES } from "@/const/mime-types";
-import { getUnionSQL } from "@/utils/sql";
+import { getUnionSQL } from "@/lib/sql";
 
 export default function UnionNode({
   id,
   data,
 }: NodeProps<UnionNode>): JSX.Element {
+  const [openPreview, setOpenPreview] = useState(false);
+
   const { getNodeConnections } = useReactFlow();
   const { qA, qB } = useStore((state) => ({
     qA: getUnionSQL(
@@ -53,9 +55,8 @@ export default function UnionNode({
     ),
   }));
 
-  const { mutate: downloadTable } = useDownloadTable();
-  const { mutate: unionTable } = useUnionTable();
-  const { mutate: clearTable } = useClearTable();
+  const { mutate: downloadTable } = useDownloadTableNode();
+  const { mutate: unionTable, status: unionStatus } = useUnionTable();
 
   const onClickDownload = useCallback(() => {
     downloadTable({
@@ -65,30 +66,27 @@ export default function UnionNode({
   }, [data.label, downloadTable]);
 
   const onClickUpdate = useCallback(() => {
-    if (qA.length === 0 || qB.length === 0) {
-      clearTable({ label: data.label });
-      return;
-    }
-
     unionTable({
       label: data.label,
       qA,
       qB,
     });
-  }, [qA, qB, data.label, unionTable, clearTable]);
+  }, [data.label, qA, qB, unionTable]);
+
+  const isDisabled = useMemo(
+    () => qA.length === 0 || qB.length === 0 || unionStatus !== "success",
+    [qA, qB, unionStatus]
+  );
 
   useEffect(() => {
-    if (qA.length === 0 || qB.length === 0) {
-      clearTable({ label: data.label });
-      return;
-    }
+    if (qA.length === 0 || qB.length === 0) return;
 
     unionTable({
       label: data.label,
       qA,
       qB,
     });
-  }, [qA, qB, data.label, unionTable, clearTable]);
+  }, [qA, qB, data.label, unionTable]);
 
   return (
     <BaseNode>
@@ -110,7 +108,18 @@ export default function UnionNode({
           <DropdownMenuContent align="start" className="w-48">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
+              onClick={() => setOpenPreview(true)}
+              disabled={isDisabled}
+              className="cursor-pointer disabled:cursor-not-allowed"
+            >
+              Preview File
+              <DropdownMenuShortcut>
+                <Rows4 />
+              </DropdownMenuShortcut>
+            </DropdownMenuItem>
+            <DropdownMenuItem
               onClick={onClickDownload}
+              disabled={isDisabled}
               className="cursor-pointer disabled:cursor-not-allowed"
             >
               Download Table
@@ -120,6 +129,7 @@ export default function UnionNode({
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={onClickUpdate}
+              disabled={isDisabled}
               className="cursor-pointer disabled:cursor-not-allowed"
             >
               Update Table
@@ -148,6 +158,11 @@ export default function UnionNode({
         />
         <LabeledHandle title="out" type="source" position={Position.Right} />
       </footer>
+      <PreviewDialog
+        data={data}
+        open={openPreview}
+        onOpenChange={setOpenPreview}
+      />
     </BaseNode>
   );
 }
