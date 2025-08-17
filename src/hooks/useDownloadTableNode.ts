@@ -27,10 +27,10 @@ export default function useDownloadTableNode() {
 
           try {
             await conn.query(`
-          COPY ${label} 
-          TO '${label}.csv' 
-          (HEADER, FORMAT CSV)
-        `);
+              COPY ${label} 
+              TO '${label}.csv' 
+              (HEADER, FORMAT CSV)
+            `);
 
             try {
               const buffer = await db.copyFileToBuffer(`${label}.csv`);
