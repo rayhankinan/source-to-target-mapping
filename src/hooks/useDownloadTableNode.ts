@@ -47,6 +47,9 @@ export default function useDownloadTableNode() {
           await writable.close();
         }
       } catch (error) {
+        if (!(error instanceof Error) || error.name !== "AbortError")
+          throw error;
+
         log.error(error);
       }
     },

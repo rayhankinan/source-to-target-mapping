@@ -55,6 +55,8 @@ export default function AppPanel(): JSX.Element {
 
       setFileList(files);
     } catch (error) {
+      if (!(error instanceof Error) || error.name !== "AbortError") throw error;
+
       log.warn(error);
     }
   }, []);
