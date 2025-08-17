@@ -168,7 +168,7 @@ export default function DataTable<TData, TValue>(
                 type="submit"
                 className="cursor-pointer disabled:cursor-not-allowed"
               >
-                Submit
+                Query
               </Button>
             </form>
           </Form>
