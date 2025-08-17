@@ -1,10 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { db } from "@/utils/db";
+import { bundle, db } from "@/utils/db";
 
 export default function useInitializeDatabase() {
   return useMutation({
     mutationFn: async () => {
+      await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+
       const conn = await db.connect();
 
       try {
