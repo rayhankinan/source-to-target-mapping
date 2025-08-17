@@ -1,4 +1,4 @@
-import { useCallback, useState, type JSX } from "react";
+import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
 import { Panel } from "@xyflow/react";
 import { Upload, Merge, X } from "lucide-react";
 import { uniqueId } from "lodash";
@@ -13,6 +13,7 @@ import {
 import ProgressDialog from "@/components/features/diagram/progress-dialog";
 import { MIME_TYPES } from "@/const/mime-types";
 import { JOIN_NODE_TYPE, UNION_NODE_TYPE } from "@/types/flow";
+import useInitializeDatabase from "@/hooks/useInitializeDatabase";
 import useFlowStore from "@/stores/flow";
 
 export default function AppPanel(): JSX.Element {
@@ -22,6 +23,14 @@ export default function AppPanel(): JSX.Element {
     useShallow((state) => ({
       addNode: state.addNode,
     }))
+  );
+
+  const { mutate: initializeDatabase, status: initializeStatus } =
+    useInitializeDatabase();
+
+  const isDisabled = useMemo(
+    () => initializeStatus !== "success",
+    [initializeStatus]
   );
 
   const onUploadFileButtonClick = useCallback(async () => {
@@ -71,6 +80,10 @@ export default function AppPanel(): JSX.Element {
     });
   }, [addNode]);
 
+  useEffect(() => {
+    initializeDatabase();
+  }, [initializeDatabase]);
+
   return (
     <>
       <Panel position="top-left" className="flex flex-row gap-2">
@@ -79,6 +92,7 @@ export default function AppPanel(): JSX.Element {
             <TooltipTrigger asChild>
               <Button
                 onClick={onUploadFileButtonClick}
+                disabled={isDisabled}
                 className="cursor-pointer disabled:cursor-not-allowed"
               >
                 <Upload />
@@ -94,6 +108,7 @@ export default function AppPanel(): JSX.Element {
             <TooltipTrigger asChild>
               <Button
                 onClick={onCombineTablesButtonClick}
+                disabled={isDisabled}
                 className="cursor-pointer disabled:cursor-not-allowed"
               >
                 <X />
@@ -109,6 +124,7 @@ export default function AppPanel(): JSX.Element {
             <TooltipTrigger asChild>
               <Button
                 onClick={onStackTablesButtonClick}
+                disabled={isDisabled}
                 className="cursor-pointer disabled:cursor-not-allowed"
               >
                 <Merge />
