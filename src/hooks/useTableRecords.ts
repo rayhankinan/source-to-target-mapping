@@ -9,7 +9,7 @@ export default function useTableRecords(selectQuery: string) {
 
       try {
         const arrowResult = await conn.query(selectQuery);
-        const result = arrowResult.toArray().map((row) => row.toJSON());
+        const result = arrowResult.toArray();
         return result;
       } finally {
         await conn.close();
